@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Modern Sports Scorecard</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="./css/index.css">
+</head>
+
+<body class="bg-gray-100 transition-colors duration-300">
+    <div id="cricketModal" style="
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+      ">
+        <div style="
+          background: linear-gradient(135deg, #0d47a1, #1976d2);
+          padding: 30px 40px;
+          border-radius: 10px;
+          box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+          max-width: 350px;
+          text-align: center;
+          color: #fff;
+          position: relative;
+        ">
+            <div style="font-size: 40px; margin-bottom: 10px">🏏</div>
+            <h2 style="margin: 0 0 10px; font-size: 24px">Innings Over!</h2>
+            <p id="cricketModalMsg" style="margin-bottom: 10px; font-size: 16px"></p>
+            <p id="cricketWinMsg" style="font-weight: bold; font-size: 18px"></p>
+
+            <button onclick="closeCricketModal()" style="
+            margin-top: 20px;
+            padding: 10px 20px;
+            border: none;
+            background: #ff9800;
+            color: #fff;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+          ">
+                OK
+            </button>
+        </div>
+    </div>
+
+    <div class="container mx-auto p-4 md:p-6 lg:p-8">
+        <!-- Header: Title, Sport Toggle, and Dark Mode Switch -->
+        <header class="flex flex-col md:flex-row justify-between items-center mb-6">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-800">
+                Match Scorecard
+            </h1>
+            <div class="flex items-center space-x-4 mt-4 md:mt-0">
+                <!-- Sport Toggle -->
+                <div class="flex items-center bg-gray-200 dark:bg-gray-700 rounded-full p-1">
+                    <button id="cricket-btn" class="px-4 py-1 text-sm font-semibold rounded-full focus:outline-none"
+                        onclick="switchSport('cricket')">
+                        Cricket
+                    </button>
+                    <button id="football-btn" class="px-4 py-1 text-sm font-semibold rounded-full focus:outline-none"
+                        onclick="switchSport('football')">
+                        Football
+                    </button>
+                </div>
+                <!-- Dark Mode Toggle -->
+                <button id="dark-mode-toggle" class="p-2 rounded-full bg-gray-200 dark:bg-gray-700 focus:outline-none">
+                    <svg id="sun-icon" class="w-6 h-6 text-yellow-500" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z">
+                        </path>
+                    </svg>
+                    <svg id="moon-icon" class="w-6 h-6 text-gray-400 hidden" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z">
+                        </path>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Scorecard Content -->
+        <main id="scorecard-container" class="bg-white rounded-xl shadow-lg overflow-hidden">
+            <!-- This content will be dynamically updated by JavaScript -->
+        </main>
+
+        <!-- Action Buttons for Score Updates -->
+        <div id="action-buttons" class="mt-6 text-center">
+            <!-- Buttons will be injected here by JS -->
+        </div>
+    </div>
+
+    <!-- HTML Templates for Scorecards -->
+    <template id="cricket-template">
+        <div class="p-4 md:p-6 border-b border-gray-200">
+            <div class="flex justify-between items-center">
+                <div>
+                    <p class="text-sm text-gray-600">Indian Premier League</p>
+                    <p class="text-lg font-semibold text-gray-800">
+                        Mumbai Indians vs Chennai Super Kings
+                    </p>
+                </div>
+                <div class="text-right">
+                    <p class="text-sm font-bold text-red-500 animate-pulse">LIVE</p>
+                    <p class="text-xs text-gray-600">Wankhede Stadium, Mumbai</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2">
+            <!-- Team 1 Score -->
+            <div class="p-6 border-b md:border-b-0 md:border-r border-gray-200">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center space-x-3">
+                        <img src="https://placehold.co/40x40/004BA0/FFFFFF?text=MI" class="w-10 h-10 rounded-full"
+                            alt="MI Logo" />
+                        <h2 class="text-2xl font-bold text-gray-800">Mumbai Indians</h2>
+                    </div>
+                    <div>
+                        <p class="text-3xl font-extrabold text-gray-800">
+                            <span id="c-score">182</span>/<span id="c-wickets">4</span>
+                        </p>
+                        <p class="text-right text-gray-600">
+                            (<span id="c-overs">18.2</span> Overs)
+                        </p>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <p class="text-sm text-gray-600">
+                        CRR: <span id="c-crr">9.93</span>
+                    </p>
+                </div>
+            </div>
+            <!-- Team 2 (Yet to Bat) -->
+            <div class="p-6 border-b md:border-b-0 md:border-r border-gray-200">
+                <div class="flex items-center space-x-3">
+                    <img src="https://placehold.co/40x40/FDB913/FFFFFF?text=CSK" class="w-10 h-10 rounded-full"
+                        alt="CSK Logo" />
+                    <h2 class="text-2xl font-bold text-gray-800">
+                        Chennai Super Kings
+                    </h2>
+                </div>
+                <p class="mt-2 text-gray-600">Yet to bat</p>
+            </div>
+        </div>
+
+        <!-- Batsmen & Bowlers -->
+        <div class="p-6 border-t border-gray-200">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="font-semibold mb-2 text-gray-800">On Strike</h3>
+                    <div class="flex justify-between items-center">
+                        <p>Suryakumar Yadav*</p>
+                        <p class="font-bold">
+                            56 <span class="text-sm font-normal text-gray-600">(28)</span>
+                        </p>
+                    </div>
+                    <div class="flex justify-between items-center mt-1">
+                        <p>Hardik Pandya</p>
+                        <p class="font-bold">
+                            24 <span class="text-sm font-normal text-gray-600">(12)</span>
+                        </p>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="font-semibold mb-2 text-gray-800">Current Bowler</h3>
+                    <div class="flex justify-between items-center">
+                        <p>Ravindra Jadeja</p>
+                        <p class="font-bold">
+                            0/35
+                            <span class="text-sm font-normal text-gray-600">(3.2)</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Match Summary & Top Performers -->
+        <div class="p-6 border-t border-gray-200">
+            <h3 class="font-bold text-lg mb-4 text-gray-800">Match Summary</h3>
+            <div class="mb-6">
+                <p class="text-sm text-gray-600 mb-2">MI Innings Progress</p>
+                <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+                    <div id="cricket-progress" class="bg-blue-600 h-2.5 rounded-full progress-bar-inner"
+                        style="width: 91.6%"></div>
+                </div>
+            </div>
+            <div>
+                <h4 class="font-semibold mb-2 text-gray-800">Top Performer</h4>
+                <div class="flex items-center space-x-4 p-3 rounded-lg bg-yellow-100 dark:bg-yellow-500/20">
+                    <svg class="w-8 h-8 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path
+                            d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z">
+                        </path>
+                    </svg>
+                    <div>
+                        <p class="font-bold text-yellow-800 dark:text-yellow-300">
+                            Suryakumar Yadav
+                        </p>
+                        <p class="text-sm text-yellow-700 dark:text-yellow-400">
+                            Batting: 56 runs (28 balls)
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="football-template">
+        <div class="p-4 md:p-6 border-b border-gray-200">
+            <div class="flex justify-between items-center">
+                <div>
+                    <p class="text-sm text-gray-600">UEFA Champions League</p>
+                    <p class="text-lg font-semibold text-gray-800">
+                        Real Madrid vs FC Barcelona
+                    </p>
+                </div>
+                <div class="text-right">
+                    <p class="text-sm font-bold text-red-500 animate-pulse">LIVE</p>
+                    <p class="text-xs text-gray-600">Santiago Bernabéu, Madrid</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Score Display -->
+        <div class="p-6 flex justify-around items-center">
+            <!-- Team 1 -->
+            <div class="text-center">
+                <img src="https://placehold.co/60x60/FEBE10/000000?text=RM" class="w-16 h-16 rounded-full mx-auto"
+                    alt="Real Madrid Logo" />
+                <h2 class="text-xl font-bold mt-2 text-gray-800">Real Madrid</h2>
+            </div>
+            <!-- Score and Time -->
+            <div class="text-center">
+                <p class="text-5xl font-extrabold text-gray-800">
+                    <span id="f-score1">2</span> - <span id="f-score2">1</span>
+                </p>
+                <p id="f-time" class="text-xl font-semibold text-red-500 mt-2">
+                    78:12
+                </p>
+            </div>
+            <!-- Team 2 -->
+            <div class="text-center">
+                <img src="https://placehold.co/60x60/A50044/FFFFFF?text=FCB" class="w-16 h-16 rounded-full mx-auto"
+                    alt="FC Barcelona Logo" />
+                <h2 class="text-xl font-bold mt-2 text-gray-800">FC Barcelona</h2>
+            </div>
+        </div>
+
+        <!-- Match Stats Tabs -->
+        <div class="px-6 border-t border-gray-200">
+            <div class="flex border-b border-gray-200">
+                <button
+                    class="flex-1 py-3 text-center font-semibold text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors duration-200 tab-active"
+                    data-tab="summary">
+                    Summary
+                </button>
+                <button
+                    class="flex-1 py-3 text-center font-semibold text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors duration-200"
+                    data-tab="stats">
+                    Stats
+                </button>
+            </div>
+            <div id="football-tab-content" class="py-6">
+                <!-- Summary Content -->
+                <div id="summary-content">
+                    <h4 class="font-semibold mb-3 text-gray-800">Goal Scorers</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li class="flex justify-between">
+                            <span>V. Júnior (28')</span><span class="font-bold">Real Madrid</span>
+                        </li>
+                        <li class="flex justify-between">
+                            <span>R. Lewandowski (55')</span><span class="font-bold">FC Barcelona</span>
+                        </li>
+                        <li class="flex justify-between">
+                            <span>J. Bellingham (72')</span><span class="font-bold">Real Madrid</span>
+                        </li>
+                    </ul>
+                </div>
+                <!-- Stats Content (Chart) -->
+                <div id="stats-content" class="hidden">
+                    <canvas id="football-stats-chart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Performer -->
+        <div class="p-6 border-t border-gray-200">
+            <h3 class="font-bold text-lg mb-4 text-gray-800">Man of the Match</h3>
+            <div class="flex items-center space-x-4 p-3 rounded-lg bg-indigo-100 dark:bg-indigo-500/20">
+                <svg class="w-8 h-8 text-indigo-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                        clip-rule="evenodd"></path>
+                </svg>
+                <div>
+                    <p class="font-bold text-indigo-800 dark:text-indigo-300">
+                        Jude Bellingham
+                    </p>
+                    <p class="text-sm text-indigo-700 dark:text-indigo-400">
+                        1 Goal, 1 Assist
+                    </p>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <script src="./index.js"></script>
+</body>
+
+</html>
