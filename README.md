@@ -9,7 +9,7 @@ Live scorecard web application for both **Cricket** and **Football** fans! Stay 
 ## 📸 Preview
 
 <!-- Replace this link with your actual screenshot if available -->
-![App Preview](https://cricket-football-scorecard.netlify.app/)
+![App Preview](](https://cricket-football-scorecard.netlify.app/))
 
 ---
 
